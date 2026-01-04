@@ -85,6 +85,7 @@ interface Scenario {
   description: Record<Language, string>;
   explanation: Record<Language, string>;
   emoji: string;
+  videoUrl: string;
   isSafe: boolean;
   category: 'stranger' | 'touch' | 'online' | 'sharing' | 'permission';
 }
@@ -99,6 +100,7 @@ const scenarioPool: Scenario[] = [
       zh: '一个陌生人让你去他的车里帮忙找小狗。'
     },
     emoji: '🐕',
+    videoUrl: '/videos/lost-puppy-help.mp4',
     isSafe: false,
     explanation: {
       en: 'Never go anywhere with a stranger! Tell a parent.',
@@ -116,6 +118,7 @@ const scenarioPool: Scenario[] = [
       zh: '你不认识的人提议开车送你回家。'
     },
     emoji: '🚗',
+    videoUrl: '/videos/offers-ride.mp4',
     isSafe: false,
     explanation: {
       en: 'Never get in cars with strangers! Say "No" and run away.',
@@ -133,6 +136,7 @@ const scenarioPool: Scenario[] = [
       zh: '你的奶奶问你想要一个拥抱吗。'
     },
     emoji: '👵',
+    videoUrl: '/videos/grandma-hug.mp4',
     isSafe: true,
     explanation: {
       en: 'Hugs from family members you trust are safe!',
@@ -150,6 +154,7 @@ const scenarioPool: Scenario[] = [
       zh: '父母在场时，医生检查你的心跳。'
     },
     emoji: '👨‍⚕️',
+    videoUrl: '/videos/doctor-checkup.mp4',
     isSafe: true,
     explanation: {
       en: 'Doctors are safe helpers when parents are present.',
@@ -374,7 +379,18 @@ export function SafetyScenarios({ onBack }: SafetyScenariosProps) {
           // Question Screen
           <div className="text-center">
             <div className="bg-white rounded-3xl p-12 shadow-xl mb-8 border-4 border-blue-100">
-              <div className="text-9xl mb-6 animate-bounce">{currentScenario.emoji}</div>
+              <div className="mb-6 flex justify-center">
+                <video
+                  src={currentScenario.videoUrl}
+                  className="w-40 h-40 rounded-2xl object-contain bg-black"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                />
+              </div>
+              <div className="text-9xl animate-bounce">{currentScenario.emoji}</div>
               <h3 className="mb-6 text-gray-800 text-2xl font-bold">{currentScenario.title[language]}</h3>
               <div className="bg-blue-50 border-4 border-blue-200 rounded-2xl p-6">
                 <p className="text-2xl text-gray-800">{currentScenario.description[language]}</p>

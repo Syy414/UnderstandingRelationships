@@ -15,6 +15,7 @@ interface Scenario {
   situation: Record<Language, string>;
   person: Record<Language, string>;
   personEmoji: string;
+  videoUrl: string;
   circleColor: string;
   action: Record<Language, string>;
   isSafe: boolean;
@@ -31,6 +32,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Mom', ms: 'Ibu', zh: '妈妈' },
     personEmoji: '👩',
+    videoUrl: '/videos/mom-hug.mp4',
     circleColor: 'blue',
     action: { en: 'Hug', ms: 'Pelukan', zh: '拥抱' },
     isSafe: true,
@@ -49,6 +51,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Stranger', ms: 'Orang Asing', zh: '陌生人' },
     personEmoji: '🧑',
+    videoUrl: '/videos/hold-hands-stranger.mp4',
     circleColor: 'red',
     action: { en: 'Hold hands', ms: 'Pegang tangan', zh: '牵手' },
     isSafe: false,
@@ -67,6 +70,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Doctor', ms: 'Doktor', zh: '医生' },
     personEmoji: '👨‍⚕️',
+    videoUrl: '/videos/doctor-checkup.mp4',
     circleColor: 'orange',
     action: { en: 'Medical check', ms: 'Pemeriksaan perubatan', zh: '医疗检查' },
     isSafe: true,
@@ -85,6 +89,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'New Person', ms: 'Orang Baru', zh: '新认识的人' },
     personEmoji: '🧔',
+    videoUrl: '/videos/new-tickles-me.mp4',
     circleColor: 'red',
     action: { en: 'Tickle', ms: 'Geli-geli', zh: '挠痒痒' },
     isSafe: false,
@@ -103,6 +108,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Teacher', ms: 'Guru', zh: '老师' },
     personEmoji: '👨‍🏫',
+    videoUrl: '/videos/teacher-high-five.mp4',
     circleColor: 'orange',
     action: { en: 'High-five', ms: 'High-five', zh: '击掌' },
     isSafe: true,
@@ -121,6 +127,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Best Friend', ms: 'Kawan Baik', zh: '好朋友' },
     personEmoji: '👦',
+    videoUrl: '/videos/bestie-play-tag.mp4',
     circleColor: 'green',
     action: { en: 'Tag game', ms: 'Permainan kejar-kejar', zh: '追逐游戏' },
     isSafe: true,
@@ -139,6 +146,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Acquaintance', ms: 'Kenalan', zh: '认识的人' },
     personEmoji: '👨‍💼',
+    videoUrl: '/videos/stranger-takes-photo.mp4',
     circleColor: 'yellow',
     action: { en: 'Take photo alone', ms: 'Ambil gambar bersendirian', zh: '单独拍照' },
     isSafe: false,
@@ -157,6 +165,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Grandpa', ms: 'Datuk', zh: '爷爷' },
     personEmoji: '👴',
+    videoUrl: '/videos/grandpa-hug.mp4',
     circleColor: 'blue',
     action: { en: 'Goodbye hug', ms: 'Pelukan perpisahan', zh: '道别拥抱' },
     isSafe: true,
@@ -175,6 +184,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Stranger', ms: 'Orang Asing', zh: '陌生人' },
     personEmoji: '🚗',
+    videoUrl: '/videos/stranger-offers-candy.mp4',
     circleColor: 'red',
     action: { en: 'Get in car', ms: 'Masuk kereta', zh: '上车' },
     isSafe: false,
@@ -193,6 +203,7 @@ const scenarios: Scenario[] = [
     },
     person: { en: 'Coach', ms: 'Jurulatih', zh: '教练' },
     personEmoji: '⚽',
+    videoUrl: '/videos/coach-helps-stretch.mp4',
     circleColor: 'orange',
     action: { en: 'Stretching help', ms: 'Bantuan regangan', zh: '拉伸帮助' },
     isSafe: true,
@@ -445,6 +456,18 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
               <p className="text-sm opacity-70">{circleInfo.name} {t.circleLabel}</p>
               <p>{currentScenario.person[language]}</p>
             </div>
+          </div>
+
+          <div className="mb-6 flex justify-center">
+            <video
+              src={currentScenario.videoUrl}
+              className="w-25 h-25 rounded-2xl object-contain bg-black"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+            />
           </div>
 
           <div className="bg-blue-50 border-4 border-blue-300 rounded-2xl p-6 mb-6">
