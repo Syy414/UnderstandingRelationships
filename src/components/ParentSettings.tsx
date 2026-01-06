@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Volume2, VolumeX, Clock, RotateCcw, Download, Upload, Shield, Bell, Eye, EyeOff, Lock, Camera, BookOpen, Globe } from 'lucide-react';
+import { ArrowLeft, Volume2, VolumeX, Clock, RotateCcw, Download, Upload, Shield, Bell, Eye, EyeOff, Lock, Camera, BookOpen, Globe, MousePointer2 } from 'lucide-react';
 import ParentPhotoCard from './ParentPhotoCard';
 import { capturePhotoFromCamera } from '../utils/imageUtils';
 import { useLanguage } from '../context/LanguageContext';
 import { useTranslation } from '../utils/translations';
+import { useGuide } from '../context/GuideContext';
 
 interface ParentSettingsProps {
   onBack: () => void;
@@ -24,6 +25,7 @@ interface Settings {
 export function ParentSettings({ onBack }: ParentSettingsProps) {
   const { language, setLanguage } = useLanguage();
   const t = useTranslation();
+  const { isPointerEnabled, setPointerEnabled } = useGuide();
   const [settings, setSettings] = useState<Settings>({
     soundEnabled: true,
     voiceEnabled: false,
@@ -380,6 +382,20 @@ export function ParentSettings({ onBack }: ParentSettingsProps) {
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">{t.accessibilityOptions}</h2>
               <div className="space-y-4">
+                {/* Pointer Guides Toggle */}
+                <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <MousePointer2 className={`w-6 h-6 ${isPointerEnabled ? 'text-purple-600' : 'text-gray-400'}`} />
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{(t as any).enablePointerGuides || 'Show Pointer Guides'}</h3>
+                      <p className="text-sm text-gray-600">{(t as any).enablePointerGuidesDesc || 'Display animated pointers to guide children'}</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setPointerEnabled(!isPointerEnabled)} className={`w-14 h-8 rounded-full transition-all ${isPointerEnabled ? 'bg-purple-500' : 'bg-gray-300'}`}>
+                    <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-transform ${isPointerEnabled ? 'translate-x-7' : 'translate-x-1'}`} />
+                  </button>
+                </div>
+
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                   <div className="flex items-center gap-4">
                     {settings.showHints ? <Eye className="w-6 h-6 text-green-600" /> : <EyeOff className="w-6 h-6 text-gray-400" />}

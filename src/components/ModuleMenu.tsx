@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useTranslation } from '../utils/translations'; // Import the hook
+import { useTranslation } from '../utils/translations';
+import { useGuide } from '../context/GuideContext';
 
 interface Game {
   id: string;
@@ -18,7 +20,29 @@ interface ModuleMenuProps {
 }
 
 export function ModuleMenu({ moduleNumber, title, color, games, onNavigate, onBack }: ModuleMenuProps) {
-  const t = useTranslation(); // Use the hook
+  const t = useTranslation();
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const [hasShownPointer, setHasShownPointer] = useState(false);
+
+  // Show pointer to first game when entering module
+  useEffect(() => {
+    if (!isPointerEnabled || hasShownPointer || games.length === 0) return;
+    
+    const firstGame = games[0];
+    const timer = setTimeout(() => {
+      showPointer({
+        id: 'first-game',
+        selector: `[data-guide="${firstGame.id}"]`,
+        message: t.tapToPlay || 'Tap to play! 🎮',
+        messagePosition: 'top',
+        pulseColor: 'rgba(59, 130, 246, 0.8)',
+        character: 'star'
+      });
+      setHasShownPointer(true);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [isPointerEnabled, hasShownPointer, games, showPointer, t]);
 
   const colorClasses = {
     purple: {
@@ -50,6 +74,7 @@ export function ModuleMenu({ moduleNumber, title, color, games, onNavigate, onBa
     <div className={`min-h-screen bg-gradient-to-b ${colors.bg} p-4 md:p-8 flex items-center justify-center`}>
       <button
         onClick={onBack}
+        data-guide="back"
         className="absolute top-6 left-6 p-4 bg-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110"
       >
         <ArrowLeft className="w-6 h-6" />
@@ -71,7 +96,11 @@ export function ModuleMenu({ moduleNumber, title, color, games, onNavigate, onBa
           {games.map((game) => (
             <button
               key={game.id}
-              onClick={() => onNavigate(game.id)}
+              data-guide={game.id}
+              onClick={() => {
+                hidePointer();
+                onNavigate(game.id);
+              }}
               className={`group relative bg-gradient-to-br ${colors.card} ${colors.hover} rounded-[2.5rem] p-10 shadow-2xl transition-all duration-300 hover:scale-105 border-8 ${colors.border}`}
             >
               <div className="text-9xl mb-4 group-hover:scale-110 transition-transform duration-300">

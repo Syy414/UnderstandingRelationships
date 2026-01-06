@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Star, Home, RotateCcw, Volume2, MessageSquare, Check, PlayCircle, X } from 'lucide-react';
 import { useLanguage, Language } from '../context/LanguageContext';
 import { useTranslation } from '../utils/translations';
 import { playSound } from '../utils/sounds';
+import { useGuide, useGameCompletion } from '../context/GuideContext';
 
 interface WhatWouldYouDoProps {
   onBack: () => void;
@@ -700,8 +701,37 @@ export function WhatWouldYouDo({ onBack }: WhatWouldYouDoProps) {
   const [waitingForChoice, setWaitingForChoice] = useState(false);
   const [selectedChoice, setSelectedChoice] = useState<Choice | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const { completeGame } = useGameCompletion('whatWouldYouDo');
+  const [hasShownStartPointer, setHasShownStartPointer] = useState(false);
+
+  // Show pointer to start button
+  useEffect(() => {
+    if (gameState === 'setup' && isPointerEnabled && !hasShownStartPointer) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'whatwouldyoudo-start',
+          selector: '[data-guide="start-game"]',
+          message: '👆 Tap to start!',
+          messagePosition: 'top',
+          pulseColor: 'rgba(234, 179, 8, 0.6)',
+          delay: 1000
+        });
+        setHasShownStartPointer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer]);
+
+  // Mark game complete when finished
+  useEffect(() => {
+    if (gameState === 'complete') {
+      completeGame();
+    }
+  }, [gameState, completeGame]);
 
   const startGame = () => {
+    hidePointer();
     const randomLength = Math.floor(Math.random() * 4) + 5; // Random 5-8
     const shuffled = [...scenarioPool].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, randomLength);
@@ -787,6 +817,7 @@ export function WhatWouldYouDo({ onBack }: WhatWouldYouDoProps) {
 
           <button
             onClick={() => startGame()}
+            data-guide="start-game"
             className="px-12 py-6 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all hover:scale-105 text-2xl font-bold shadow-lg flex items-center justify-center gap-3 mx-auto"
           >
             <PlayCircle className="w-8 h-8" />

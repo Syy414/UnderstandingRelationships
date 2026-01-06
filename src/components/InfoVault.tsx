@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Lock, Share2, Star, Home, RotateCcw, Check, X, Volume2, Shield, AlertTriangle, PlayCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTranslation } from '../utils/translations';
 import { playSound } from '../utils/sounds';
+import { useGuide, useGameCompletion } from '../context/GuideContext';
 
 interface InfoVaultProps {
   onBack: () => void;
@@ -297,8 +298,37 @@ export function InfoVault({ onBack }: InfoVaultProps) {
   const [isCorrect, setIsCorrect] = useState(false);
   const { language } = useLanguage();
   const t = useTranslation();
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const { completeGame } = useGameCompletion('infoVault');
+  const [hasShownStartPointer, setHasShownStartPointer] = useState(false);
+
+  // Show pointer to start button
+  useEffect(() => {
+    if (gameState === 'setup' && isPointerEnabled && !hasShownStartPointer) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'infovault-start',
+          selector: '[data-guide="start-game"]',
+          message: '👆 Tap to start!',
+          messagePosition: 'top',
+          pulseColor: 'rgba(59, 130, 246, 0.6)',
+          delay: 1000
+        });
+        setHasShownStartPointer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer]);
+
+  // Mark game complete when finished
+  useEffect(() => {
+    if (gameState === 'complete') {
+      completeGame();
+    }
+  }, [gameState, completeGame]);
 
   const startGame = () => {
+    hidePointer();
     const randomLength = Math.floor(Math.random() * 4) + 5; // Random 5-8
     const shuffled = [...infoPool].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, randomLength);
@@ -392,6 +422,7 @@ export function InfoVault({ onBack }: InfoVaultProps) {
 
           <button
             onClick={() => startGame()}
+            data-guide="start-game"
             className="px-12 py-6 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all hover:scale-105 text-2xl font-bold shadow-lg flex items-center justify-center gap-3 mx-auto"
           >
             <PlayCircle className="w-8 h-8" />

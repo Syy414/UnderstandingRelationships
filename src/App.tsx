@@ -13,18 +13,22 @@ import { PermissionRequest } from './components/PermissionRequest';
 import { ParentSettings } from './components/ParentSettings';
 import { LanguageSelector } from './components/LanguageSelector';
 import { OnboardingTutorial } from './components/OnboardingTutorial';
+import { GuidedPointer } from './components/GuidedPointer';
+import { GuideProvider, useGuide } from './context/GuideContext';
 import { useTranslation } from './utils/translations';
 
 type Screen = 'main' | 'module1' | 'module2' | 'module3' | 
   'circles' | 'safecontact' | 'privatePublic' | 'scenarioQuiz' | 'safetyScenarios' | 'infoVault' |
   'spaceBubble' | 'whatWouldYouDo' | 'parentSettings';
 
-export default function App() {
+// Inner component that uses the Guide context
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('main');
   const [showPermissions, setShowPermissions] = useState(false);
   const [showLanguageSelect, setShowLanguageSelect] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const t = useTranslation();
+  const { currentPointer, hidePointer } = useGuide();
 
   useEffect(() => {
     // 1. Check if language has been set up initially
@@ -97,11 +101,18 @@ export default function App() {
   }
 
   const handleNavigate = (screen: string) => {
+    hidePointer(); // Hide any active pointer when navigating
     setCurrentScreen(screen as Screen);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50">
+      {/* Guided Pointer Overlay */}
+      <GuidedPointer 
+        target={currentPointer} 
+        onTargetClick={hidePointer}
+      />
+
       {/* Onboarding Tutorial Overlay */}
       {showTutorial && (
         <OnboardingTutorial 
@@ -192,5 +203,14 @@ export default function App() {
         <ParentSettings onBack={() => setCurrentScreen('main')} />
       )}
     </div>
+  );
+}
+
+// Main App component wrapped with GuideProvider
+export default function App() {
+  return (
+    <GuideProvider>
+      <AppContent />
+    </GuideProvider>
   );
 }

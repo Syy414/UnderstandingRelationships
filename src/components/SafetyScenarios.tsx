@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Check, X, Star, RotateCcw, Home, Volume2, ArrowDown, PlayCircle } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { playSound } from '../utils/sounds';
+import { useGuide, useGameCompletion } from '../context/GuideContext';
 
 interface SafetyScenariosProps {
   onBack: () => void;
@@ -176,8 +177,36 @@ export function SafetyScenarios({ onBack }: SafetyScenariosProps) {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const { completeGame } = useGameCompletion('safetyScenarios');
+  const [hasShownStartPointer, setHasShownStartPointer] = useState(false);
 
   const t = translations[language];
+
+  // Show pointer to start button
+  useEffect(() => {
+    if (gameState === 'intro' && isPointerEnabled && !hasShownStartPointer) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'safety-start',
+          selector: '[data-guide="start-game"]',
+          message: '👆 Tap to start!',
+          messagePosition: 'top',
+          pulseColor: 'rgba(168, 85, 247, 0.6)',
+          delay: 1000
+        });
+        setHasShownStartPointer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer]);
+
+  // Mark game complete when finished
+  useEffect(() => {
+    if (gameState === 'complete') {
+      completeGame();
+    }
+  }, [gameState, completeGame]);
 
   // Load settings on mount
   useEffect(() => {
@@ -286,7 +315,8 @@ export function SafetyScenarios({ onBack }: SafetyScenariosProps) {
             </div>
 
             <button
-              onClick={startSession}
+              onClick={() => { hidePointer(); startSession(); }}
+              data-guide="start-game"
               className="px-12 py-6 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all hover:scale-105 text-2xl font-bold shadow-lg flex items-center justify-center gap-3 mx-auto"
             >
               <PlayCircle className="w-8 h-8" />

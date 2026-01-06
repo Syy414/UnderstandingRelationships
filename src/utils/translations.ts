@@ -328,6 +328,18 @@ export const translations = {
     tutorialNext: "Next",
     tutorialSkip: "Skip tutorial",
     tutorialLetsGo: "Let's Go!",
+
+    // Guided Pointer Messages
+    tapToStart: "Tap to start! 👆",
+    tapTheCircle: "Tap the right circle! 🎯",
+    tapToContinue: "Tap to continue! ➡️",
+    tapToPlay: "Tap to play! 🎮",
+    greatJobNextGame: "Great job! Try the next game! 🌟",
+    goBackForMore: "Go back for more games! ⬅️",
+    tryThisOne: "Try this one! 👆",
+    wellDone: "Well done! 🎉",
+    enablePointerGuides: "Show Pointer Guides",
+    enablePointerGuidesDesc: "Display animated pointers to guide children",
   },
   ms: {
     // Language Selector
@@ -656,6 +668,18 @@ export const translations = {
     tutorialNext: "Seterusnya",
     tutorialSkip: "Langkau tutorial",
     tutorialLetsGo: "Jom Mula!",
+
+    // Guided Pointer Messages
+    tapToStart: "Ketuk untuk mula! 👆",
+    tapTheCircle: "Ketuk bulatan yang betul! 🎯",
+    tapToContinue: "Ketuk untuk teruskan! ➡️",
+    tapToPlay: "Ketuk untuk bermain! 🎮",
+    greatJobNextGame: "Bagus! Cuba permainan seterusnya! 🌟",
+    goBackForMore: "Kembali untuk lebih banyak permainan! ⬅️",
+    tryThisOne: "Cuba yang ini! 👆",
+    wellDone: "Syabas! 🎉",
+    enablePointerGuides: "Tunjuk Panduan Penunjuk",
+    enablePointerGuidesDesc: "Paparkan penunjuk animasi untuk membimbing kanak-kanak",
   },
   zh: {
     // Language Selector
@@ -984,6 +1008,18 @@ export const translations = {
     tutorialNext: "下一步",
     tutorialSkip: "跳过教程",
     tutorialLetsGo: "开始吧！",
+
+    // Guided Pointer Messages
+    tapToStart: "点击开始！👆",
+    tapTheCircle: "点击正确的圆圈！🎯",
+    tapToContinue: "点击继续！➡️",
+    tapToPlay: "点击开始玩！🎮",
+    greatJobNextGame: "做得好！试试下一个游戏！🌟",
+    goBackForMore: "返回玩更多游戏！⬅️",
+    tryThisOne: "试试这个！👆",
+    wellDone: "做得好！🎉",
+    enablePointerGuides: "显示指引",
+    enablePointerGuidesDesc: "显示动画指引帮助儿童",
   }
 };
 

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Check, X, Star, PlayCircle } from 'lucide-react';
 import { getCharacterImage } from '../utils/imageUtils';
 import { useLanguage } from '../context/LanguageContext';
 import { useTranslation } from '../utils/translations';
+import { useGuide, useGameCompletion } from '../context/GuideContext';
 
 interface SafeContactGameProps {
   onBack: () => void;
@@ -223,8 +224,57 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const { language } = useLanguage();
   const t = useTranslation();
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const { completeGame } = useGameCompletion('safecontact');
+  const [hasShownStartPointer, setHasShownStartPointer] = useState(false);
+
+  const currentScenario = selectedScenarios[currentIndex];
+
+  // Show pointer to start button on first visit
+  useEffect(() => {
+    if (gameState === 'setup' && isPointerEnabled && !hasShownStartPointer) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'safecontact-start',
+          selector: '[data-guide="start-game"]',
+          message: (t as any).tapToStart || 'Tap to start! 👆',
+          messagePosition: 'top',
+          pulseColor: 'rgba(34, 197, 94, 0.6)',
+          delay: 1000
+        });
+        setHasShownStartPointer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer, t]);
+
+  // Show pointer to guide answer selection
+  useEffect(() => {
+    if (gameState === 'playing' && !feedback && isPointerEnabled && currentScenario) {
+      const timer = setTimeout(() => {
+        const selector = currentScenario.isSafe ? '[data-guide="safe-btn"]' : '[data-guide="unsafe-btn"]';
+        showPointer({
+          id: 'safecontact-answer',
+          selector,
+          message: (t as any).tryThisOne || 'Try this one! 👆',
+          messagePosition: 'top',
+          pulseColor: currentScenario.isSafe ? 'rgba(34, 197, 94, 0.6)' : 'rgba(239, 68, 68, 0.6)',
+          delay: 3000 // Give them time to think first
+        });
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, feedback, currentIndex, currentScenario, isPointerEnabled, showPointer, t]);
+
+  // Mark game complete when finished
+  useEffect(() => {
+    if (gameState === 'complete') {
+      completeGame();
+    }
+  }, [gameState, completeGame]);
 
   const startGame = () => {
+    hidePointer();
     const randomLength = Math.floor(Math.random() * 4) + 5; // Random 5-8
     const shuffled = [...scenarios].sort(() => Math.random() - 0.5);
     const selected = shuffled.slice(0, randomLength);
@@ -233,8 +283,6 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
     setScore(0);
     setGameState('playing');
   };
-
-  const currentScenario = selectedScenarios[currentIndex];
 
   const handleChoice = (userSaysIsSafe: boolean) => {
     if (feedback || !currentScenario) return;
@@ -342,6 +390,7 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
             </button>
             <button
               onClick={onBack}
+              data-guide="back"
               className="px-8 py-4 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition-all hover:scale-105"
             >
               {t.backToModule}
@@ -391,6 +440,7 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
 
           <button
             onClick={() => startGame()}
+            data-guide="start-game"
             className="px-12 py-6 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-all hover:scale-105 text-2xl font-bold shadow-lg flex items-center justify-center gap-3 mx-auto"
           >
             <PlayCircle className="w-8 h-8" />
@@ -478,7 +528,8 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
 
           <div className="grid grid-cols-2 gap-6">
             <button
-              onClick={() => handleChoice(true)}
+              onClick={() => { hidePointer(); handleChoice(true); }}
+              data-guide="safe-btn"
               disabled={feedback !== null}
               className={`bg-green-100 border-4 border-green-400 text-green-700 rounded-3xl p-8 transition-all
                 ${!feedback ? 'hover:bg-green-200 hover:scale-105 active:scale-95' : 'opacity-60'}
@@ -490,7 +541,8 @@ export function SafeContactGame({ onBack }: SafeContactGameProps) {
             </button>
 
             <button
-              onClick={() => handleChoice(false)}
+              onClick={() => { hidePointer(); handleChoice(false); }}
+              data-guide="unsafe-btn"
               disabled={feedback !== null}
               className={`bg-red-100 border-4 border-red-400 text-red-700 rounded-3xl p-8 transition-all
                 ${!feedback ? 'hover:bg-red-200 hover:scale-105 active:scale-95' : 'opacity-60'}

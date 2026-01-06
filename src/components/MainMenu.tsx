@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Settings, HelpCircle } from 'lucide-react';
 import { useTranslation } from '../utils/translations';
+import { useGuide } from '../context/GuideContext';
 
 interface MainMenuProps {
   onNavigate: (screen: string) => void;
@@ -8,6 +10,36 @@ interface MainMenuProps {
 
 export function MainMenu({ onNavigate, onShowTutorial }: MainMenuProps) {
   const t = useTranslation();
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+
+  // Show pointer to first module when user arrives at main menu
+  useEffect(() => {
+    if (!isPointerEnabled) {
+      console.log('MainMenu: Pointer guides are disabled');
+      return;
+    }
+    
+    // Check if this is a first-time user (hasn't completed any games)
+    const completedGames = localStorage.getItem('completedGames');
+    const hasCompletedAnyGame = completedGames && JSON.parse(completedGames).length > 0;
+    
+    // Always show pointer to help users find where to start
+    const timer = setTimeout(() => {
+      console.log('MainMenu: Showing pointer to module1');
+      showPointer({
+        id: 'first-module',
+        selector: '[data-guide="module1"]',
+        message: hasCompletedAnyGame 
+          ? (t.continueHere || 'Continue here! 🎮')
+          : (t.tapToStart || 'Tap here to start! 👆'),
+        messagePosition: 'bottom',
+        pulseColor: 'rgba(168, 85, 247, 0.8)',
+        character: 'bear'
+      });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [isPointerEnabled, showPointer, t]);
 
   const modules = [
     {
@@ -77,7 +109,11 @@ export function MainMenu({ onNavigate, onShowTutorial }: MainMenuProps) {
           {modules.map((module) => (
             <button
               key={module.id}
-              onClick={() => onNavigate(module.id)}
+              data-guide={module.id}
+              onClick={() => {
+                hidePointer();
+                onNavigate(module.id);
+              }}
               className={`group relative bg-gradient-to-br ${module.color} ${module.hoverColor} rounded-[2.5rem] p-8 shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-3xl border-8 ${module.borderColor}`}
             >
               {/* Emoji */}

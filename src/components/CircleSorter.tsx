@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Check, Volume2, User, Users, Heart, Handshake, Shield, AlertCircle, Star, Home, RotateCcw, PlayCircle } from 'lucide-react';
 import { Confetti } from './Confetti';
 import { getCharacterImage } from '../utils/imageUtils';
 import { useLanguage, Language } from '../context/LanguageContext';
 import { useTranslation } from '../utils/translations';
 import { playSound } from '../utils/sounds';
+import { useGuide, useGameCompletion } from '../context/GuideContext';
 
 interface CircleSorterProps {
   onBack: () => void;
@@ -126,6 +127,8 @@ type GameState = 'intro' | 'playing' | 'feedback' | 'complete';
 export function CircleSorter({ onBack }: CircleSorterProps) {
   const { language } = useLanguage();
   const t = useTranslation();
+  const { showPointer, hidePointer, isPointerEnabled } = useGuide();
+  const { completeGame } = useGameCompletion('circles');
   const [gameState, setGameState] = useState<GameState>('intro');
   const [sessionLength, setSessionLength] = useState<number>(0);
   const [selectedCharacters, setSelectedCharacters] = useState<Character[]>([]);
@@ -134,7 +137,70 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
   const [waitingForCircle, setWaitingForCircle] = useState(false);
   const [selectedCircleId, setSelectedCircleId] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [hasShownStartPointer, setHasShownStartPointer] = useState(false);
   // color guide legend removed — no left/right guides
+
+  // Show pointer to start button on first visit
+  useEffect(() => {
+    if (gameState === 'intro' && isPointerEnabled && !hasShownStartPointer) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'circles-start',
+          selector: '[data-guide="start-game"]',
+          message: t.tapToStart || 'Tap to start!',
+          messagePosition: 'top',
+          pulseColor: 'rgba(168, 85, 247, 0.6)',
+          delay: 1000
+        });
+        setHasShownStartPointer(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer, t]);
+
+  // Show pointer to guide circle selection
+  useEffect(() => {
+    if (gameState === 'playing' && waitingForCircle && isPointerEnabled) {
+      const currentChar = selectedCharacters[currentIndex];
+      if (currentChar) {
+        const timer = setTimeout(() => {
+          showPointer({
+            id: 'circles-select',
+            selector: `[data-circle="${currentChar.correctCircle}"]`,
+            message: t.tapTheCircle || 'Tap the right circle!',
+            messagePosition: 'top',
+            pulseColor: 'rgba(34, 197, 94, 0.6)',
+            delay: 2000 // Give them time to think first
+          });
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [gameState, waitingForCircle, currentIndex, selectedCharacters, isPointerEnabled, showPointer, t]);
+
+  // Show pointer to continue button in feedback state
+  useEffect(() => {
+    if (gameState === 'feedback' && isPointerEnabled) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'circles-continue',
+          selector: '[data-guide="continue"]',
+          message: t.tapToContinue || 'Tap to continue!',
+          messagePosition: 'top',
+          pulseColor: 'rgba(59, 130, 246, 0.6)',
+          delay: 500
+        });
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, isPointerEnabled, showPointer, t]);
+
+  // Mark game complete when finished
+  useEffect(() => {
+    if (gameState === 'complete') {
+      completeGame();
+    }
+  }, [gameState, completeGame]);
 
   // Helper to get circle label/description from translation
   const getCircleLabel = (circle: Circle) => (t as any)[circle.labelKey] || circle.labelKey;
@@ -252,7 +318,8 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
           </div>
 
           <button
-            onClick={() => startGame()}
+            onClick={() => { hidePointer(); startGame(); }}
+            data-guide="start-game"
             className="px-12 py-6 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition-all hover:scale-105 text-2xl font-bold shadow-lg flex items-center justify-center gap-3 mx-auto"
           >
             <PlayCircle className="w-8 h-8" />
@@ -317,6 +384,8 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
             </button>
             <button
               onClick={onBack}
+              data-guide="back"
+              data-guide-next="safecontact"
               className="px-10 py-6 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all hover:scale-105 flex items-center gap-3 text-xl shadow-xl border-4 border-blue-600"
               style={{ fontFamily: 'Comic Sans MS, cursive' }}
             >
@@ -426,7 +495,8 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
             )}
 
             <button
-              onClick={handleContinue}
+              onClick={() => { hidePointer(); handleContinue(); }}
+              data-guide="continue"
               className={`px-12 py-6 text-white rounded-full text-xl transition-all hover:scale-105 ${
                 isCorrect 
                   ? 'bg-green-500 hover:bg-green-600' 
@@ -587,7 +657,8 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
             return (
                 <button
                 key={circle.id}
-                onClick={() => handleCircleClick(circle.id)}
+                data-circle={circle.id}
+                onClick={() => { hidePointer(); handleCircleClick(circle.id); }}
                 disabled={!isClickable}
                 className={`rounded-full flex items-center justify-center transition-all duration-300 ${isClickable ? 'hover:scale-105' : ''}`}
                 style={{
