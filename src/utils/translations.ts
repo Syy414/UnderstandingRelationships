@@ -331,6 +331,7 @@ export const translations = {
 
     // Guided Pointer Messages
     tapToStart: "Tap to start! 👆",
+    tapHere: "Tap here! 👆",
     tapTheCircle: "Tap the right circle! 🎯",
     tapToContinue: "Tap to continue! ➡️",
     tapToPlay: "Tap to play! 🎮",
@@ -671,6 +672,7 @@ export const translations = {
 
     // Guided Pointer Messages
     tapToStart: "Ketuk untuk mula! 👆",
+    tapHere: "Ketuk sini! 👆",
     tapTheCircle: "Ketuk bulatan yang betul! 🎯",
     tapToContinue: "Ketuk untuk teruskan! ➡️",
     tapToPlay: "Ketuk untuk bermain! 🎮",
@@ -1011,6 +1013,7 @@ export const translations = {
 
     // Guided Pointer Messages
     tapToStart: "点击开始！👆",
+    tapHere: "点这里！👆",
     tapTheCircle: "点击正确的圆圈！🎯",
     tapToContinue: "点击继续！➡️",
     tapToPlay: "点击开始玩！🎮",

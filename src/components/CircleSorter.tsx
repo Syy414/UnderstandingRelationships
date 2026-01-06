@@ -158,7 +158,24 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
     }
   }, [gameState, isPointerEnabled, hasShownStartPointer, showPointer, t]);
 
-  // Show pointer to guide circle selection
+  // Show pointer to "Choose the circle" button when playing and waiting to choose
+  useEffect(() => {
+    if (gameState === 'playing' && !waitingForCircle && isPointerEnabled) {
+      const timer = setTimeout(() => {
+        showPointer({
+          id: 'choose-circle-btn',
+          selector: '[data-guide="choose-circle"]',
+          message: t.tapHere || 'Tap here! 👆',
+          messagePosition: 'top',
+          pulseColor: 'rgba(168, 85, 247, 0.8)',
+          character: 'bear'
+        });
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState, waitingForCircle, isPointerEnabled, showPointer, t]);
+
+  // Show pointer to guide circle selection after tapping "Choose the circle"
   useEffect(() => {
     if (gameState === 'playing' && waitingForCircle && isPointerEnabled) {
       const currentChar = selectedCharacters[currentIndex];
@@ -169,10 +186,10 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
             selector: `[data-circle="${currentChar.correctCircle}"]`,
             message: t.tapTheCircle || 'Tap the right circle!',
             messagePosition: 'top',
-            pulseColor: 'rgba(34, 197, 94, 0.6)',
-            delay: 2000 // Give them time to think first
+            pulseColor: 'rgba(34, 197, 94, 0.8)',
+            character: 'star'
           });
-        }, 3000);
+        }, 1500);
         return () => clearTimeout(timer);
       }
     }
@@ -607,7 +624,11 @@ export function CircleSorter({ onBack }: CircleSorterProps) {
           </div>
 
           <button
-            onClick={handleChooseCircle}
+            data-guide="choose-circle"
+            onClick={() => {
+              hidePointer();
+              handleChooseCircle();
+            }}
             disabled={waitingForCircle}
             className={`w-full py-5 rounded-2xl text-xl transition-all ${
               waitingForCircle
